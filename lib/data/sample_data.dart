@@ -59,12 +59,12 @@ class SampleData {
       description:
           "A creamy, authentic Italian pasta dish made with eggs, cheese, pancetta, and black pepper. Simple ingredients create an incredibly rich and satisfying meal.",
       imageUrl:
-          "https://www.marthastewart.com/thmb/AE7HR9inp0wlw9RrNC97fUud4Z4=/750x0/filters:no_upscale():max_bytes(150000):strip_icc()/MSL-338686-spaghetti-carbonara-hero-3x2-69999-560b45d1dd9f4741b717176eff024839.jpeg",
+          "https://media.istockphoto.com/id/508898476/photo/spaghetti-garlic-and-oil.jpg?s=612x612&w=is&k=20&c=zBeR1N0Im1ivubofI-umb0r1E7wJ0RecjFLxLgJ6i7E=",
 
       additionalImages: [
         "https://leitesculinaria.com/wp-content/uploads/2024/04/spaghetti-carbonara-1-2.jpg",
         "https://images.services.kitchenstories.io/a6xpbLCSr1tEGCFWeX1tcmpvwg8=/1920x0/filters:quality(80)/images.kitchenstories.io/wagtailOriginalImages/R2568-photo-final-_0.jpg",
-        "https://media.istockphoto.com/id/508898476/photo/spaghetti-garlic-and-oil.jpg?s=612x612&w=is&k=20&c=zBeR1N0Im1ivubofI-umb0r1E7wJ0RecjFLxLgJ6i7E=",
+        "https://www.marthastewart.com/thmb/AE7HR9inp0wlw9RrNC97fUud4Z4=/750x0/filters:no_upscale():max_bytes(150000):strip_icc()/MSL-338686-spaghetti-carbonara-hero-3x2-69999-560b45d1dd9f4741b717176eff024839.jpeg",
       ],
       cookTimeMinutes: 15,
       prepTimeMinutes: 10,

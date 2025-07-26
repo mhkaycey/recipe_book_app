@@ -49,10 +49,14 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
         ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final recipeName = arguments['recipeName'] as String;
     final recipe = arguments['recipeData'] as Recipe;
+
+    // Check if recipe is favorite
     _recipeService.isFavorite(recipe.id).then((isFav) {
-      setState(() {
-        isFavorite = isFav;
-      });
+      if (mounted) {
+        setState(() {
+          isFavorite = isFav;
+        });
+      }
     });
 
     return Scaffold(
@@ -77,6 +81,10 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
                     const SizedBox(height: 32),
                     _buildInstructionsSection(recipe),
                     const SizedBox(height: 32),
+                    _buildNutritionalInfo(recipe),
+                    const SizedBox(height: 32),
+                    _buildImageGallery(recipe),
+                    const SizedBox(height: 32),
                     _buildActionButtons(recipe),
                     const SizedBox(height: 20),
                   ],
@@ -95,7 +103,6 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
       pinned: true,
       backgroundColor: Colors.white,
       elevation: 0,
-
       leading: Container(
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
@@ -141,33 +148,39 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
             },
           ),
         ),
-        // Container(
-        //   margin: const EdgeInsets.all(8),
-        //   decoration: BoxDecoration(
-        //     color: Colors.white.withValues(alpha: 0.9),
-        //     borderRadius: BorderRadius.circular(12),
-        //     boxShadow: [
-        //       BoxShadow(
-        //         color: Colors.black.withValues(alpha: 0.1),
-        //         blurRadius: 8,
-        //         offset: const Offset(0, 2),
-        //       ),
-        //     ],
-        //   ),
-        //   child: IconButton(
-        //     icon: const Icon(Icons.share, color: Colors.black87),
-        //     onPressed: () => _shareRecipe(recipe),
-        //   ),
-        // ),
+        Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.9),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.share, color: Colors.black87),
+            onPressed: () => _shareRecipe(recipe),
+          ),
+        ),
       ],
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           recipeName,
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(
+                offset: const Offset(0, 1),
+                blurRadius: 3,
+                color: Colors.black.withValues(alpha: 0.3),
+              ),
+            ],
+          ),
         ),
-
         centerTitle: true,
         collapseMode: CollapseMode.parallax,
         background: Stack(
@@ -198,9 +211,6 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
                   colors: [
                     Colors.transparent,
                     Colors.black.withValues(alpha: 0.3),
-                    // Colors.black.withValues(alpha: 0.1),
-                    // Colors.black.withValues(alpha: 0.4),
-                    // Colors.black.withValues(alpha: 0.7),
                   ],
                 ),
               ),
@@ -215,14 +225,6 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Text(
-        //   recipe.title,
-        //   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-        //     fontWeight: FontWeight.bold,
-        //     color: Colors.black87,
-        //     height: 1.2,
-        //   ),
-        // ),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -240,11 +242,11 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
     );
   }
 
-  Widget _buildRatingStars(int count) {
+  Widget _buildRatingStars(int rating) {
     return Row(
-      children: List.generate(count, (index) {
+      children: List.generate(5, (index) {
         return Icon(
-          index < 4 ? Icons.star : Icons.star_border,
+          index < rating ? Icons.star : Icons.star_border,
           color: Colors.amber,
           size: 20,
         );
@@ -481,6 +483,138 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
     );
   }
 
+  Widget _buildNutritionalInfo(Recipe recipe) {
+    // Assuming Recipe model has nutritional info - if not, you can remove this section
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Nutritional Information',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              _buildNutritionRow(
+                'Calories',
+                '${recipe.nutritionInfo.calories}',
+              ),
+              const Divider(),
+              _buildNutritionRow('Protein', '${recipe.nutritionInfo.protein}g'),
+              const Divider(),
+              _buildNutritionRow('Carbs', '${recipe.nutritionInfo.carbs}g'),
+              const Divider(),
+              _buildNutritionRow('Fat', '${recipe.nutritionInfo.fat}g'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNutritionRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: Colors.grey[700]),
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Colors.black87,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageGallery(Recipe recipe) {
+    // Assuming Recipe model has additional images - if not, you can remove this section
+    if (recipe.additionalImages.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Recipe Gallery',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 120,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: recipe.additionalImages.length,
+            itemBuilder: (context, index) {
+              return Container(
+                margin: const EdgeInsets.only(right: 12),
+                width: 120,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: CachedNetworkImage(
+                    imageUrl: recipe.additionalImages[index],
+                    fit: BoxFit.cover,
+                    placeholder:
+                        (context, url) => Container(
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                    errorWidget:
+                        (context, url, error) => Container(
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.error),
+                        ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildActionButtons(Recipe recipe) {
     return Column(
       children: [
@@ -489,15 +623,14 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
           height: 56,
           child: ElevatedButton.icon(
             onPressed: () => _addToShoppingList(recipe),
-
-            // style: ElevatedButton.styleFrom(
-            //   // backgroundColor: Colors.orange[500],
-            //   // foregroundColor: Colors.white,
-            //   // elevation: 0,
-            //   // shape: RoundedRectangleBorder(
-            //   //   borderRadius: BorderRadius.circular(16),
-            //   // ),
-            // ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange[500],
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
             icon: const Icon(Icons.shopping_cart, size: 24),
             label: const Text(
               'Add to Shopping List',
@@ -529,33 +662,44 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
     );
   }
 
-  void _toggleFavorite() {
+  void _toggleFavorite() async {
     setState(() {
       isFavorite = !isFavorite;
     });
+
     if (isFavorite) {
       _favoriteController.forward();
+      await _recipeService.addFavourite(
+        (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['recipeData']
+            .id,
+      );
     } else {
       _favoriteController.reverse();
+      await _recipeService.removeFavourite(
+        (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['recipeData']
+            .id,
+      );
     }
   }
 
-  // void _shareRecipe(Recipe recipe) {
-  //   // Implement share functionality
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //     SnackBar(
-  //       content: Text('Sharing ${recipe.title}...'),
-  //       behavior: SnackBarBehavior.floating,
-  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-  //     ),
-  //   );
-  // }
+  void _shareRecipe(Recipe recipe) {
+    // Implement share functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Sharing ${recipe.title}...'),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
 
   void _startCooking(Recipe recipe) {
     // Navigate to cooking mode or timer
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Starting cooking mode...'),
+        content: Text('Starting cooking mode...'),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
@@ -566,7 +710,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
     _recipeService.addToShoppingList(recipe);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Added to shopping list!'),
+        content: Text('Added to shopping list!'),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),

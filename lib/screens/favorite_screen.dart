@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:recipe_book_app/model/recipe.dart';
 import 'package:recipe_book_app/services/services.dart';
+import 'package:recipe_book_app/widgets/common/extension/extensions.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -36,38 +37,28 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       setState(() {
         _isLoading = false;
       });
-      _showErrorSnackBar('Failed to load favourites');
+      if (context.mounted) {
+        // ignore: use_build_context_synchronously
+        context.showSuccessSnackBar('Recipe removed from favourites');
+      }
     }
   }
 
-  Future<void> _removeFromFavourites(String recipeId) async {
+  Future<void> _removeFromFavourites(
+    BuildContext context,
+    String recipeId,
+  ) async {
     try {
       await _recipeService.removeFavourite(recipeId);
       await _loadFavourites();
-      _showSuccessSnackBar('Recipe removed from favourites');
+      if (context.mounted) {
+        context.showSuccessSnackBar('Recipe removed from favourites');
+      }
     } catch (e) {
-      _showErrorSnackBar('Failed to remove recipe from favourites');
+      if (context.mounted) {
+        context.showErrorSnackBar('Failed to remove recipe from favourites');
+      }
     }
-  }
-
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
-  void _showSuccessSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   void _navigateToRecipeDetail(Recipe recipe) {
@@ -198,7 +189,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _removeFromFavourites(recipe.id);
+                _removeFromFavourites(context, recipe.id);
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('Remove'),

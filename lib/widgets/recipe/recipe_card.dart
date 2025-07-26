@@ -52,7 +52,7 @@ class _ResponsiveRecipeCardState extends State<ResponsiveRecipeCard> {
                       ? 300
                       : ResponsiveBreakpoints.isTablet(context)
                       ? 150
-                      : 300,
+                      : 250,
             ),
 
             Expanded(

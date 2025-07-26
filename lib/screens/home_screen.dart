@@ -23,9 +23,33 @@ class _HomeScreenState extends State<HomeScreen> {
   // Timer? _debounce;
   List<Recipe> searchResults = [];
 
+  List<String> _categories = [];
+  bool _categoriesLoading = true;
+  String? _categoriesError;
+
+  Future<void> _loadCategories() async {
+    try {
+      final categories = await _recipeService.getCategories();
+      if (mounted) {
+        setState(() {
+          _categories = categories;
+          _categoriesLoading = false;
+        });
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _categoriesError = 'Failed to load categories';
+          _categoriesLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   void initState() {
     _recipeService.getShoppingList();
+    _loadCategories();
     super.initState();
   }
 
@@ -212,97 +236,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildQuickCategories(BuildContext context) {
-    return FutureBuilder<List<String>>(
-      future: _recipeService.getCategories(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Quick Categories',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 12),
-              CircularProgressIndicator(),
-            ],
-          );
-        } else if (snapshot.hasError) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Quick Categories',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 12),
-              Text('Failed to load categories'),
-            ],
-          );
-        } else {
-          final categories = snapshot.data ?? [];
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Quick Categories',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 12),
-              Wrap(
-                spacing: 12,
-                children:
-                    categories
-                        .map(
-                          (category) => GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                '/recipesBycategory',
-                                arguments: category,
-                              );
-                              log('Navigating to category: $category');
-                            },
-                            child: SizedBox(
-                              height: 40,
-                              child: ListView(
-                                scrollDirection: Axis.horizontal,
-                                physics: const BouncingScrollPhysics(),
-                                shrinkWrap: true,
-                                // padding: EdgeInsets.symmetric(horizontal: 8),
-                                children: [
-                                  Chip(
-                                    label: Text(
-                                      category,
-                                      style:
-                                          Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium,
-                                      // ?.copyWith(color: Colors.white),
-                                    ),
-                                    // backgroundColor: Colors.orange[600],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
-              ),
-            ],
-          );
-        }
-      },
-    );
-  }
-
   Widget _buildRecentlyViewed(BuildContext context) {
     // Placeholder for recently viewed section
     return Column(
@@ -323,10 +256,94 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // // Helper methods
-  // void _showSearch(BuildContext context) {
-  //   // Implement search functionality
-  // }
+  Widget _buildQuickCategories(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Quick Categories',
+          style: Theme.of(
+            context,
+          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        if (_categoriesLoading)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: CircularProgressIndicator(),
+            ),
+          )
+        else if (_categoriesError != null)
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Text(
+                  _categoriesError!,
+                  style: TextStyle(color: Colors.red[600]),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _categoriesLoading = true;
+                      _categoriesError = null;
+                    });
+                    _loadCategories();
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          )
+        else
+          _buildCategoryChips(),
+      ],
+    );
+  }
+
+  Widget _buildCategoryChips() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        children:
+            _categories.asMap().entries.map((entry) {
+              final index = entry.key;
+              final category = entry.value;
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  left: index == 0 ? 0 : 8,
+                  right: index == _categories.length - 1 ? 0 : 4,
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/recipesBycategory',
+                      arguments: category,
+                    );
+                    log('Navigating to category: $category');
+                  },
+                  child: Chip(
+                    label: Text(
+                      category,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    backgroundColor: Colors.orange[50],
+                    side: BorderSide(color: Colors.orange[200]!, width: 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+      ),
+    );
+  }
 
   void _navigateToShoppingList(BuildContext context) {
     // Navigate to shopping list
