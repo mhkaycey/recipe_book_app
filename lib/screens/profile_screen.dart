@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:recipe_book_app/model/user_preference.dart';
+import 'package:recipe_book_app/utils/reponsive_breakpoints.dart';
+import 'package:recipe_book_app/widgets/app_drawer.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,6 +22,7 @@ class ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Profile')),
+      drawer: ResponsiveBreakpoints.isMobile(context) ? AppDrawer() : null,
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(

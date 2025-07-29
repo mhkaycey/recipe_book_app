@@ -1,9 +1,13 @@
 // widgets/common/responsive_navigation.dart
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:recipe_book_app/main.dart';
 import 'package:recipe_book_app/screens/favorite_screen.dart';
 import 'package:recipe_book_app/screens/home_screen.dart';
 import 'package:recipe_book_app/screens/profile_screen.dart';
 import 'package:recipe_book_app/screens/recipe_list_screen.dart';
+import 'package:recipe_book_app/style/app_colors.dart';
 import 'package:recipe_book_app/utils/reponsive_breakpoints.dart';
 
 class ResponsiveNavigation extends StatefulWidget {
@@ -142,17 +146,23 @@ class ResponsiveNavigationState extends State<ResponsiveNavigation> {
                         decoration: BoxDecoration(
                           color:
                               isSelected
-                                  ? Theme.of(
-                                    context,
-                                  ).primaryColor.withValues(alpha: 0.1)
+                                  ? Brightness.dark ==
+                                          Theme.of(context).brightness
+                                      ? AppColor.primary.withValues(alpha: 0.1)
+                                      : Theme.of(
+                                        context,
+                                      ).primaryColor.withValues(alpha: 0.05)
                                   : Colors.transparent,
                           borderRadius: BorderRadius.circular(12),
                           border:
                               isSelected
                                   ? Border.all(
-                                    color: Theme.of(
-                                      context,
-                                    ).primaryColor.withValues(alpha: 0.2),
+                                    color:
+                                        Brightness.dark ==
+                                                Theme.of(context).brightness
+                                            ? AppColor.primary
+                                            : Theme.of(context).primaryColor
+                                                .withValues(alpha: 0.2),
                                     width: 1,
                                   )
                                   : null,
@@ -165,7 +175,10 @@ class ResponsiveNavigationState extends State<ResponsiveNavigation> {
                               decoration: BoxDecoration(
                                 color:
                                     isSelected
-                                        ? Theme.of(context).primaryColor
+                                        ? Brightness.dark ==
+                                                Theme.of(context).brightness
+                                            ? AppColor.primary
+                                            : Theme.of(context).primaryColor
                                         : Theme.of(
                                           context,
                                         ).primaryColor.withValues(alpha: 0.1),
@@ -176,7 +189,7 @@ class ResponsiveNavigationState extends State<ResponsiveNavigation> {
                                 color:
                                     isSelected
                                         ? Colors.white
-                                        : Theme.of(context).primaryColor,
+                                        : Theme.of(context).colorScheme.primary,
                                 size: 20,
                               ),
                             ),
@@ -189,7 +202,12 @@ class ResponsiveNavigationState extends State<ResponsiveNavigation> {
                                 ).textTheme.bodyMedium?.copyWith(
                                   color:
                                       isSelected
-                                          ? Theme.of(context).primaryColor
+                                          ? (Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? Colors.white
+                                              : Theme.of(
+                                                context,
+                                              ).colorScheme.primary)
                                           : Theme.of(
                                             context,
                                           ).textTheme.bodyMedium?.color,
@@ -205,7 +223,7 @@ class ResponsiveNavigationState extends State<ResponsiveNavigation> {
                                 width: 6,
                                 height: 6,
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).primaryColor,
+                                  color: AppColor.primary,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -218,9 +236,88 @@ class ResponsiveNavigationState extends State<ResponsiveNavigation> {
               },
             ),
           ),
+          // Footer Section
+          Container(
+            margin: EdgeInsets.all(16),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: _toggleTheme,
+
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Icons.light_mode
+                            : Icons.dark_mode,
+                        color:
+                            Brightness.light == Theme.of(context).brightness
+                                ? Theme.of(context).primaryColor
+                                : Colors.white,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        Theme.of(context).brightness == Brightness.dark
+                            ? 'Light Mode'
+                            : 'Dark Mode',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color:
+                              Brightness.light == Theme.of(context).brightness
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Divider(height: 1, color: Colors.grey[300]),
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              '© ${DateTime.now().year} Recipe App',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  void _toggleTheme() {
+    try {
+      final appState = MyApp.of(context);
+      if (appState != null) {
+        appState.toggleTheme();
+        final currentTheme =
+            Theme.of(context).brightness == Brightness.dark ? 'Light' : 'Dark';
+        log("Theme toggled to: $currentTheme");
+      } else {
+        log("Error: Could not access app state for theme toggle");
+        // Fallback: Show a snackbar to inform the user
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Theme toggle not available'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      log("Error toggling theme: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error changing theme'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Widget _buildTabletLayout() {
@@ -240,7 +337,27 @@ class ResponsiveNavigationState extends State<ResponsiveNavigation> {
   }
 
   Widget _buildMobileLayout() {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
+      key: scaffoldKey,
+
+      drawer: Drawer(
+        child: ListView.builder(
+          itemCount: destinations.length,
+          itemBuilder: (context, index) {
+            final destination = destinations[index];
+            return ListTile(
+              leading: Icon(destination.icon),
+              title: Text(destination.label),
+              selected: selectedIndex == index,
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                _onDestinationSelected(index);
+              },
+            );
+          },
+        ),
+      ),
       body: destinations[selectedIndex].page,
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,

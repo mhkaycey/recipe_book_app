@@ -28,16 +28,102 @@ class _ResponsiveRecipeCardState extends State<ResponsiveRecipeCard> {
   void initState() {
     super.initState();
     RecipeService().isFavorite(widget.recipe.id).then((isFav) {
-      setState(() {
-        widget.isFavorite = isFav;
-      });
+      if (mounted) {
+        setState(() {
+          widget.isFavorite = isFav;
+        });
+      }
     });
+  }
+
+  // Enhanced responsive dimensions
+  double _getImageHeight(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+
+    if (ResponsiveBreakpoints.isMobile(context)) {
+      // Mobile: Use percentage of screen width for consistent aspect ratio
+      return screenWidth * 0.6; // 60% of screen width
+    } else if (ResponsiveBreakpoints.isTablet(context)) {
+      // Tablet: Balanced height considering both width and screen size
+      return screenWidth > 600 ? 180 : 160;
+    } else {
+      // Desktop: Fixed height but responsive to screen size
+      return screenHeight > 800 ? 220 : 180;
+    }
+  }
+
+  double _getCardPadding(BuildContext context) {
+    if (ResponsiveBreakpoints.isMobile(context)) {
+      return 8.0;
+    } else if (ResponsiveBreakpoints.isTablet(context)) {
+      return 12.0;
+    } else {
+      return 16.0;
+    }
+  }
+
+  double _getTitleFontSize(BuildContext context) {
+    if (ResponsiveBreakpoints.isMobile(context)) {
+      return 14.0;
+    } else if (ResponsiveBreakpoints.isTablet(context)) {
+      return 16.0;
+    } else {
+      return 18.0;
+    }
+  }
+
+  double _getDescriptionFontSize(BuildContext context) {
+    if (ResponsiveBreakpoints.isMobile(context)) {
+      return 11.0;
+    } else if (ResponsiveBreakpoints.isTablet(context)) {
+      return 12.0;
+    } else {
+      return 13.0;
+    }
+  }
+
+  double _getIconSize(BuildContext context) {
+    if (ResponsiveBreakpoints.isMobile(context)) {
+      return 12.0;
+    } else if (ResponsiveBreakpoints.isTablet(context)) {
+      return 14.0;
+    } else {
+      return 16.0;
+    }
+  }
+
+  double _getChipFontSize(BuildContext context) {
+    if (ResponsiveBreakpoints.isMobile(context)) {
+      return 10.0;
+    } else if (ResponsiveBreakpoints.isTablet(context)) {
+      return 11.0;
+    } else {
+      return 12.0;
+    }
+  }
+
+  int _getMaxTitleLines(BuildContext context) {
+    return ResponsiveBreakpoints.isMobile(context) ? 2 : 1;
+  }
+
+  int _getMaxDescriptionLines(BuildContext context) {
+    if (ResponsiveBreakpoints.isMobile(context)) {
+      return 3;
+    } else if (ResponsiveBreakpoints.isTablet(context)) {
+      return 2;
+    } else {
+      return 2;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final cardPadding = _getCardPadding(context);
+    final isLargeScreen = !ResponsiveBreakpoints.isMobile(context);
+
     return Card(
-      elevation: 4,
+      elevation: isLargeScreen ? 6 : 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: widget.onTap,
@@ -45,84 +131,49 @@ class _ResponsiveRecipeCardState extends State<ResponsiveRecipeCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildImage(
-              context,
-              height:
-                  ResponsiveBreakpoints.isMobile(context)
-                      ? 300
-                      : ResponsiveBreakpoints.isTablet(context)
-                      ? 150
-                      : 250,
-            ),
-
+            _buildImage(context),
             Expanded(
-              flex: 2,
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(cardPadding * 3),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title
+                    // Title with responsive sizing
                     Text(
                       widget.recipe.title,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: _getTitleFontSize(context),
                         fontWeight: FontWeight.bold,
                       ),
-                      maxLines: 1,
+                      maxLines: _getMaxTitleLines(context),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    // Description
+                    SizedBox(height: cardPadding * 0.3),
+
+                    // Description with responsive sizing
                     Expanded(
+                      flex: ResponsiveBreakpoints.isMobile(context) ? 2 : 1,
                       child: Text(
                         widget.recipe.description,
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                        maxLines: 2,
+                        style: TextStyle(
+                          fontSize: _getDescriptionFontSize(context),
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: _getMaxDescriptionLines(context),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    // Time and Difficulty
-                    Row(
-                      spacing: 12,
-                      children: [
-                        _buildInfoChip(
-                          icon: Icons.timer,
-                          label: '${widget.recipe.totalTimeMinutes}min',
-                          color: Colors.blue,
-                        ),
 
-                        _buildInfoChip(
-                          icon: Icons.people,
-                          label: '${widget.recipe.servings}',
-                          color: Colors.green,
-                        ),
-                        const Spacer(),
-                        _buildRating(),
-                      ],
-                    ),
-                    // Quick meal indicator and dietary tags
-                    if (widget.recipe.isQuickMeal ||
-                        widget.recipe.isVegetarian ||
-                        widget.recipe.isVegan ||
-                        widget.recipe.isGlutenFree)
+                    SizedBox(height: cardPadding * 0.5),
+
+                    // Responsive info row
+                    _buildInfoRow(context),
+                    SizedBox(height: cardPadding * 0.5),
+                    // Dietary tags with responsive layout
+                    if (_hasDietaryTags())
                       Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Wrap(
-                          spacing: 4,
-                          children: [
-                            if (widget.recipe.isQuickMeal)
-                              _buildTag('Quick', Colors.green[600]!),
-                            if (widget.recipe.isVegan)
-                              _buildTag('Vegan', Colors.green[700]!),
-                            if (!widget.recipe.isVegan &&
-                                widget.recipe.isVegetarian)
-                              _buildTag('Vegetarian', Colors.green[600]!),
-                            if (widget.recipe.isGlutenFree)
-                              _buildTag('GF', Colors.orange[600]!),
-                          ],
-                        ),
+                        padding: EdgeInsets.only(top: cardPadding * 0.3),
+                        child: _buildDietaryTags(context),
                       ),
                   ],
                 ),
@@ -134,82 +185,217 @@ class _ResponsiveRecipeCardState extends State<ResponsiveRecipeCard> {
     );
   }
 
-  Widget _buildImage(BuildContext context, {required double height}) {
+  Widget _buildImage(BuildContext context) {
+    final imageHeight = _getImageHeight(context);
+    final isMobile = ResponsiveBreakpoints.isMobile(context);
+
     return Stack(
       children: [
         Container(
-          height: height,
+          height: imageHeight,
+          width: double.infinity,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            image: DecorationImage(
-              image: CachedNetworkImageProvider(widget.recipe.imageUrl),
-
+            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+            child: CachedNetworkImage(
+              imageUrl: widget.recipe.imageUrl,
               fit: BoxFit.cover,
+              placeholder:
+                  (context, url) => Container(
+                    color: Colors.grey[200],
+                    child: Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+              errorWidget:
+                  (context, url, error) => Container(
+                    color: Colors.grey[200],
+                    child: Icon(
+                      Icons.image_not_supported,
+                      color: Colors.grey[400],
+                      size: isMobile ? 40 : 50,
+                    ),
+                  ),
             ),
           ),
         ),
-        Positioned(top: 8, right: 8, child: _buildFavoriteButton()),
-        Positioned(bottom: 8, left: 8, child: _buildDifficultyBadge()),
-      ],
-    );
-  }
-
-  Widget _buildRating() {
-    return Row(
-      children: [
-        Icon(Icons.star, color: Colors.amber, size: 16),
-        SizedBox(width: 4),
-        Text(
-          widget.recipe.rating.toStringAsFixed(1),
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+        Positioned(
+          top: isMobile ? 6 : 8,
+          right: isMobile ? 6 : 8,
+          child: _buildFavoriteButton(context),
+        ),
+        Positioned(
+          bottom: isMobile ? 6 : 8,
+          left: isMobile ? 6 : 8,
+          child: _buildDifficultyBadge(context),
         ),
       ],
     );
   }
 
-  Widget _buildFavoriteButton() {
+  Widget _buildInfoRow(BuildContext context) {
+    final isMobile = ResponsiveBreakpoints.isMobile(context);
+
+    if (isMobile) {
+      // Stack info chips vertically on mobile if needed
+      return Column(
+        spacing: 12,
+        children: [
+          Row(
+            children: [
+              _buildInfoChip(
+                context: context,
+                icon: Icons.timer,
+                label: '${widget.recipe.totalTimeMinutes}min',
+                color: Colors.blue,
+              ),
+              SizedBox(width: 8),
+              _buildInfoChip(
+                context: context,
+                icon: Icons.people,
+                label: '${widget.recipe.servings}',
+                color: Colors.green,
+              ),
+              Spacer(),
+              _buildRating(context),
+            ],
+          ),
+        ],
+      );
+    } else {
+      // Horizontal layout for tablet and desktop
+      return Row(
+        children: [
+          _buildInfoChip(
+            context: context,
+            icon: Icons.timer,
+            label: '${widget.recipe.totalTimeMinutes}min',
+            color: Colors.blue,
+          ),
+          SizedBox(width: 12),
+          _buildInfoChip(
+            context: context,
+            icon: Icons.people,
+            label: '${widget.recipe.servings}',
+            color: Colors.green,
+          ),
+          Spacer(),
+          _buildRating(context),
+        ],
+      );
+    }
+  }
+
+  Widget _buildRating(BuildContext context) {
+    final iconSize = _getIconSize(context);
+    final fontSize = _getChipFontSize(context);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.star, color: Colors.amber, size: iconSize),
+        SizedBox(width: 2),
+        Text(
+          widget.recipe.rating.toStringAsFixed(1),
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: fontSize),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFavoriteButton(BuildContext context) {
+    final isMobile = ResponsiveBreakpoints.isMobile(context);
+    final size = isMobile ? 36.0 : 40.0;
+    final iconSize = isMobile ? 20.0 : 24.0;
+
     return InkWell(
       onTap: () {
         RecipeService().addFavourite(widget.recipe.id);
-        setState(() {
-          widget.isFavorite = !widget.isFavorite;
-        });
+        if (mounted) {
+          setState(() {
+            widget.isFavorite = !widget.isFavorite;
+          });
+        }
       },
+      borderRadius: BorderRadius.circular(size / 2),
       child: Container(
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.9),
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minWidth: 40, minHeight: 40),
-          child: Icon(
-            widget.isFavorite ? Icons.favorite : Icons.favorite_border,
-            color: widget.isFavorite ? Colors.red : Colors.grey[600],
-          ),
+        child: Icon(
+          widget.isFavorite ? Icons.favorite : Icons.favorite_border,
+          color: widget.isFavorite ? Colors.red : Colors.grey[600],
+          size: iconSize,
         ),
       ),
     );
   }
 
-  Widget _buildTag(String text, Color color) {
+  bool _hasDietaryTags() {
+    return widget.recipe.isQuickMeal ||
+        widget.recipe.isVegetarian ||
+        widget.recipe.isVegan ||
+        widget.recipe.isGlutenFree;
+  }
+
+  Widget _buildDietaryTags(BuildContext context) {
+    final isMobile = ResponsiveBreakpoints.isMobile(context);
+
+    return Wrap(
+      spacing: isMobile ? 3 : 4,
+      runSpacing: isMobile ? 2 : 3,
+      children: [
+        if (widget.recipe.isQuickMeal)
+          _buildTag(context, 'Quick', Colors.green[600]!),
+        if (widget.recipe.isVegan)
+          _buildTag(context, 'Vegan', Colors.green[700]!),
+        if (!widget.recipe.isVegan && widget.recipe.isVegetarian)
+          _buildTag(context, 'Vegetarian', Colors.green[600]!),
+        if (widget.recipe.isGlutenFree)
+          _buildTag(context, 'GF', Colors.orange[600]!),
+      ],
+    );
+  }
+
+  Widget _buildTag(BuildContext context, String text, Color color) {
+    final isMobile = ResponsiveBreakpoints.isMobile(context);
+    final fontSize = isMobile ? 9.0 : 10.0;
+    final padding = isMobile ? 6.0 : 8.0;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: padding, vertical: 3),
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 10,
+        style: TextStyle(
+          fontSize: fontSize,
           color: Colors.white,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
 
-  Widget _buildDifficultyBadge() {
+  Widget _buildDifficultyBadge(BuildContext context) {
+    final isMobile = ResponsiveBreakpoints.isMobile(context);
+    final fontSize = isMobile ? 9.0 : 10.0;
+    final padding = isMobile ? 6.0 : 8.0;
+
     Color badgeColor;
     switch (widget.recipe.difficulty.toLowerCase()) {
       case 'easy':
@@ -226,16 +412,23 @@ class _ResponsiveRecipeCardState extends State<ResponsiveRecipeCard> {
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: padding, vertical: 3),
       decoration: BoxDecoration(
-        color: badgeColor,
-        borderRadius: BorderRadius.circular(12),
+        color: badgeColor.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 3,
+            offset: Offset(0, 1),
+          ),
+        ],
       ),
       child: Text(
         widget.recipe.difficulty.toUpperCase(),
         style: TextStyle(
           color: Colors.white,
-          fontSize: 10,
+          fontSize: fontSize,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -243,25 +436,32 @@ class _ResponsiveRecipeCardState extends State<ResponsiveRecipeCard> {
   }
 
   Widget _buildInfoChip({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required Color color,
   }) {
+    final isMobile = ResponsiveBreakpoints.isMobile(context);
+    final iconSize = _getIconSize(context);
+    final fontSize = _getChipFontSize(context);
+    final padding = isMobile ? 6.0 : 8.0;
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: padding, vertical: 3),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 0.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
-          SizedBox(width: 4),
+          Icon(icon, size: iconSize, color: color),
+          SizedBox(width: 3),
           Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: fontSize,
               color: color,
               fontWeight: FontWeight.w600,
             ),

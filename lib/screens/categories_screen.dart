@@ -136,8 +136,6 @@ class CategoryRecipesScreenState extends State<CategoryRecipesScreen> {
                           ),
                         ),
                       ),
-                      // Icon(Icons.arrow_forward_ios, size: 16),
-                      // SizedBox(width: 8),
                     ],
                   ),
                 );

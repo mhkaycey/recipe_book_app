@@ -1,39 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:recipe_book_app/routes/routes_gen.dart';
-import 'package:recipe_book_app/style/app_colors.dart';
+import 'package:recipe_book_app/style/theme.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  static final GlobalKey<MyAppState> appKey = GlobalKey<MyAppState>();
+  const MyApp({super.key, Key? appKey});
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => MyAppState();
+
+  static MyAppState? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<_MyAppInherited>()
+        ?.appState;
+  }
+}
+
+class MyAppState extends State<MyApp> {
+  bool _isDarkMode = false;
+  bool get isDarkMode => _isDarkMode;
+
+  void toggleTheme() {
+    setState(() {
+      _isDarkMode = !_isDarkMode;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          primary: AppColor.primary,
-          seedColor: AppColor.primary,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.orange[500],
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
-        useMaterial3: true,
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
+    return _MyAppInherited(
+      appState: this,
+      child: MaterialApp(
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
+
+        initialRoute: '/',
+        onGenerateRoute: RouteGenerator.generateRoute,
+        debugShowCheckedModeBanner: false,
       ),
-      onGenerateRoute: RouteGenerator.generateRoute,
-      initialRoute: '/',
-      debugShowCheckedModeBanner: false,
     );
+  }
+}
+
+class _MyAppInherited extends InheritedWidget {
+  final MyAppState appState;
+
+  const _MyAppInherited({required this.appState, required super.child});
+
+  @override
+  bool updateShouldNotify(_MyAppInherited oldWidget) {
+    return oldWidget.appState != appState;
   }
 }

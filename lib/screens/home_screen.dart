@@ -1,4 +1,3 @@
-// screens/home_screen.dart
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -6,6 +5,7 @@ import 'package:recipe_book_app/data/sample_data.dart';
 import 'package:recipe_book_app/model/recipe.dart';
 import 'package:recipe_book_app/services/services.dart';
 import 'package:recipe_book_app/utils/reponsive_breakpoints.dart';
+import 'package:recipe_book_app/widgets/app_drawer.dart';
 import 'package:recipe_book_app/widgets/common/badge.dart';
 import 'package:recipe_book_app/widgets/recipe/responsive_recipe_grid.dart';
 
@@ -57,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(context),
+      drawer: ResponsiveBreakpoints.isMobile(context) ? AppDrawer() : null,
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -71,6 +72,38 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildRecentlyViewed(context),
           ],
         ),
+      ),
+    );
+  }
+
+  Drawer appDrawer(BuildContext context) {
+    return Drawer(
+      shape: ContinuousRectangleBorder(),
+
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
+            child: Text(
+              'Recipe Book',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.home),
+            title: Text('Home'),
+            onTap: () => Navigator.pushReplacementNamed(context, '/'),
+          ),
+          ListTile(
+            leading: Icon(Icons.shopping_cart_outlined),
+            title: Text('Shopping List'),
+            onTap: () => _navigateToShoppingList(context),
+          ),
+        ],
       ),
     );
   }
@@ -95,27 +128,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     fillColor: Colors.grey[200],
                   ),
 
-                  // onChanged: (value) {
-                  //   if (_debounce?.isActive ?? false) _debounce!.cancel();
-                  //   _debounce = Timer(
-                  //     const Duration(milliseconds: 300),
-                  //     () async {
-                  //       final result = await _recipeService.searchRecipes(
-                  //         value,
-                  //       );
-                  //       setState(() {
-                  //         searchResults = result;
-                  //       });
-                  //       // if (value.isNotEmpty) {
-                  //       //   Navigator.pushNamed(
-                  //       //     context,
-                  //       //     '/search',
-                  //       //     arguments: value,
-                  //       //   );
-                  //       // }
-                  //     },
-                  //   );
-                  // },
                   onSubmitted: (value) {
                     if (value.isNotEmpty) {
                       Navigator.pushNamed(context, '/search', arguments: value);
@@ -136,17 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
               }),
           child: Icon(_showSearchField ? Icons.close : Icons.search),
         ),
-        // IconButton(
-        //   icon: Icon(_showSearchField ? Icons.close : Icons.search),
-        //   onPressed:
-        //       () => setState(() {
-        //         _showSearchField = !_showSearchField;
-        //         if (!_showSearchField) {
-        //           _controller.clear();
-        //         }
-        //       }),
-        //   // _showSearch(context),
-        // ),
+
         SimpleBadge(
           showBadge: true,
           value: _recipeService.shopList.length.toString(),
@@ -332,10 +334,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       category,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    backgroundColor: Colors.orange[50],
+
                     side: BorderSide(color: Colors.orange[200]!, width: 1),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(5),
                     ),
                   ),
                 ),

@@ -51,7 +51,7 @@ class _ShoppingRecipeCardState extends State<ShoppingRecipeCard> {
                   ),
                   child: Icon(
                     Icons.restaurant,
-                    color: Colors.green[600],
+                    color: Theme.of(context).primaryColor,
                     size: 28,
                   ),
                 ),
@@ -112,7 +112,8 @@ class _ShoppingRecipeCardState extends State<ShoppingRecipeCard> {
                             color:
                                 isPurchased
                                     ? Colors.green[50]
-                                    : Colors.grey[50],
+                                    : Colors.transparent,
+
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color:

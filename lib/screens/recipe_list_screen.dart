@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:recipe_book_app/data/sample_data.dart';
 import 'package:recipe_book_app/model/recipe.dart';
+import 'package:recipe_book_app/utils/reponsive_breakpoints.dart';
+import 'package:recipe_book_app/widgets/app_drawer.dart';
 
 class RecipeListScreen extends StatelessWidget {
   final List<Recipe> recipes = SampleData.featuredRecipes.toList();
@@ -13,6 +15,8 @@ class RecipeListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('All Recipes')),
+      drawer:
+          ResponsiveBreakpoints.isMobile(context) ? const AppDrawer() : null,
       body: ListView.builder(
         itemCount: recipes.length,
         itemBuilder: (context, index) {

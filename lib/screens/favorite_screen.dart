@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:recipe_book_app/model/recipe.dart';
 import 'package:recipe_book_app/services/services.dart';
+import 'package:recipe_book_app/utils/reponsive_breakpoints.dart';
+import 'package:recipe_book_app/widgets/app_drawer.dart';
 import 'package:recipe_book_app/widgets/common/extension/extensions.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -76,11 +78,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text(
           'My Favourites',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          // style: TextStyle(fontWeight: FontWeight.bold),
         ),
 
         elevation: 0,
@@ -92,6 +93,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
         ],
       ),
+      drawer:
+          ResponsiveBreakpoints.isMobile(context) ? const AppDrawer() : null,
       body: _buildBody(),
     );
   }
@@ -218,7 +221,6 @@ class FavouriteRecipeCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Card(
-        color: Colors.white,
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: InkWell(
@@ -289,10 +291,13 @@ class FavouriteRecipeCard extends StatelessWidget {
                         ),
                         child: Text(
                           recipe.category,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
                           ),
                         ),
                       ),
@@ -311,7 +316,7 @@ class FavouriteRecipeCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        // color: Colors.black87,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -331,11 +336,13 @@ class FavouriteRecipeCard extends StatelessWidget {
                     Row(
                       children: [
                         _buildTimeChip(
+                          context,
                           Icons.schedule,
                           '${recipe.prepTimeMinutes + recipe.cookTimeMinutes} min',
                         ),
                         const SizedBox(width: 12),
                         _buildTimeChip(
+                          context,
                           Icons.restaurant,
                           '${recipe.ingredients.length} ingredients',
                         ),
@@ -366,11 +373,14 @@ class FavouriteRecipeCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeChip(IconData icon, String text) {
+  Widget _buildTimeChip(BuildContext context, IconData icon, String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color:
+            Theme.of(context).brightness == Brightness.dark
+                ? ColorScheme.dark().surface
+                : Colors.grey[200],
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

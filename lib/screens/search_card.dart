@@ -15,8 +15,7 @@ class RecipeCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisSize:
-              MainAxisSize.min, // Important: This tells Column to shrink-wrap
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image section
