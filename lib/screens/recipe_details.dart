@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:recipe_book_app/model/recipe.dart';
 import 'package:recipe_book_app/services/services.dart';
+import 'package:recipe_book_app/widgets/common/extension/extensions.dart';
 
 class RecipeDetailPage extends StatefulWidget {
   const RecipeDetailPage({super.key});
@@ -189,7 +190,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
             Hero(
               tag: 'recipe-${recipe.id}',
               child: CachedNetworkImage(
-                imageUrl: recipe.imageUrl,
+                imageUrl: recipe.imageUrl.getCorsProxyUrl(),
                 fit: BoxFit.cover,
                 placeholder:
                     (context, url) => Container(
@@ -308,10 +309,9 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
       children: [
         Text(
           'About this recipe',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         Text(
@@ -333,10 +333,9 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
           children: [
             Text(
               'Ingredients',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -369,6 +368,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
             ],
           ),
           child: ListView.separated(
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: recipe.ingredients.length,
@@ -421,10 +421,9 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
       children: [
         Text(
           'Instructions',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         ...recipe.instructions.asMap().entries.map((entry) {
@@ -484,16 +483,15 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
   }
 
   Widget _buildNutritionalInfo(Recipe recipe) {
-    // Assuming Recipe model has nutritional info - if not, you can remove this section
+    final nutritionMap = recipe.nutritionInfo.toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Nutritional Information',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         Container(
@@ -509,26 +507,44 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
               ),
             ],
           ),
-          child: Column(
-            children: [
-              _buildNutritionRow(
-                'Calories',
-                '${recipe.nutritionInfo.calories}',
-              ),
-              const Divider(),
-              _buildNutritionRow('Protein', '${recipe.nutritionInfo.protein}g'),
-              const Divider(),
-              _buildNutritionRow('Carbs', '${recipe.nutritionInfo.carbs}g'),
-              const Divider(),
-              _buildNutritionRow('Fat', '${recipe.nutritionInfo.fat}g'),
-            ],
+          child: ListView.separated(
+            padding: EdgeInsets.zero,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: nutritionMap.length,
+            separatorBuilder: (_, __) => Divider(),
+            itemBuilder: (context, index) {
+              final data = nutritionMap[index];
+
+              return _buildNutritionRow(
+                data['name']!,
+                data['value']!,
+                data['unit']!,
+              );
+            },
           ),
+          // Column(
+          //   children:
+          //    [
+
+          //     // _buildNutritionRow(
+          //     //   'Calories',
+          //     //   '${recipe.nutritionInfo.calories}kcal',
+          //     // ),
+          //     // const Divider(),
+          //     // _buildNutritionRow('Protein', '${recipe.nutritionInfo.protein}g'),
+          //     // const Divider(),
+          //     // _buildNutritionRow('Carbs', '${recipe.nutritionInfo.carbs}g'),
+          //     // const Divider(),
+          //     // _buildNutritionRow('Fat', '${recipe.nutritionInfo.fat}g'),
+          //   ],
+          // ),
         ),
       ],
     );
   }
 
-  Widget _buildNutritionRow(String label, String value) {
+  Widget _buildNutritionRow(String label, String value, String unit) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -541,7 +557,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
             ).textTheme.bodyLarge?.copyWith(color: Colors.grey[700]),
           ),
           Text(
-            value,
+            "$value$unit",
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
               color: Colors.black87,
               fontWeight: FontWeight.w600,
@@ -563,10 +579,9 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
       children: [
         Text(
           'Recipe Gallery',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         SizedBox(
@@ -591,7 +606,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage>
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: CachedNetworkImage(
-                    imageUrl: recipe.additionalImages[index],
+                    imageUrl: recipe.additionalImages[index].getCorsProxyUrl(),
                     fit: BoxFit.cover,
                     placeholder:
                         (context, url) => Container(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:recipe_book_app/model/recipe.dart';
 import 'package:recipe_book_app/services/services.dart';
 import 'package:recipe_book_app/utils/reponsive_breakpoints.dart';
+import 'package:recipe_book_app/widgets/common/extension/extensions.dart';
 
 // ignore: must_be_immutable
 class ResponsiveRecipeCard extends StatefulWidget {
@@ -130,13 +131,19 @@ class _ResponsiveRecipeCardState extends State<ResponsiveRecipeCard> {
         borderRadius: BorderRadius.circular(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+
           children: [
             _buildImage(context),
-            Expanded(
+            Flexible(
+              fit: FlexFit.tight,
               child: Padding(
-                padding: EdgeInsets.all(cardPadding * 3),
+                padding: EdgeInsets.all(
+                  cardPadding * (isLargeScreen ? 1.5 : 1.0),
+                ).copyWith(bottom: cardPadding * 2),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // Title with responsive sizing
                     Text(
@@ -175,6 +182,7 @@ class _ResponsiveRecipeCardState extends State<ResponsiveRecipeCard> {
                         padding: EdgeInsets.only(top: cardPadding * 0.3),
                         child: _buildDietaryTags(context),
                       ),
+                    SizedBox(height: cardPadding * 1),
                   ],
                 ),
               ),
@@ -192,6 +200,7 @@ class _ResponsiveRecipeCardState extends State<ResponsiveRecipeCard> {
     return Stack(
       children: [
         Container(
+          padding: EdgeInsets.zero,
           height: imageHeight,
           width: double.infinity,
           decoration: BoxDecoration(
@@ -200,7 +209,7 @@ class _ResponsiveRecipeCardState extends State<ResponsiveRecipeCard> {
           child: ClipRRect(
             borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
             child: CachedNetworkImage(
-              imageUrl: widget.recipe.imageUrl,
+              imageUrl: widget.recipe.imageUrl.getCorsProxyUrl(),
               fit: BoxFit.cover,
               placeholder:
                   (context, url) => Container(

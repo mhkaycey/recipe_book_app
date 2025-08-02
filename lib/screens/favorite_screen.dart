@@ -294,10 +294,7 @@ class FavouriteRecipeCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black,
+                            color: Colors.white,
                           ),
                         ),
                       ),

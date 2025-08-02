@@ -1,10 +1,12 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:recipe_book_app/data/sample_data.dart';
 import 'package:recipe_book_app/model/recipe.dart';
 import 'package:recipe_book_app/utils/reponsive_breakpoints.dart';
 import 'package:recipe_book_app/widgets/app_drawer.dart';
+import 'package:recipe_book_app/widgets/common/extension/extensions.dart';
 
 class RecipeListScreen extends StatelessWidget {
   final List<Recipe> recipes = SampleData.featuredRecipes.toList();
@@ -24,7 +26,9 @@ class RecipeListScreen extends StatelessWidget {
 
           return ListTile(
             leading: CircleAvatar(
-              backgroundImage: NetworkImage(recipe.imageUrl),
+              backgroundImage: CachedNetworkImageProvider(
+                recipe.imageUrl.getCorsProxyUrl(),
+              ),
             ),
             title: Text(recipe.title),
             subtitle: Text(

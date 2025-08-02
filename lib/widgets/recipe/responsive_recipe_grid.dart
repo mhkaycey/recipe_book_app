@@ -23,9 +23,10 @@ class ResponsiveRecipeGrid extends StatelessWidget {
         maxItems != null ? recipes.take(maxItems!).toList() : recipes;
 
     final crossAxisCount = ResponsiveBreakpoints.getColumns(context);
-    final aspectRatio = ResponsiveBreakpoints.isMobile(context) ? 0.75 : 0.8;
+    final aspectRatio = ResponsiveBreakpoints.isMobile(context) ? 0.8 : 0.8;
 
     return GridView.builder(
+      padding: EdgeInsets.zero,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

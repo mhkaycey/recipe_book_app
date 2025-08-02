@@ -1,7 +1,9 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:recipe_book_app/model/recipe.dart';
+import 'package:recipe_book_app/widgets/common/extension/extensions.dart';
 
 class RecipeCard extends StatelessWidget {
   final Recipe recipe;
@@ -21,12 +23,12 @@ class RecipeCard extends StatelessWidget {
             // Image section
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
-              child: Image.network(
-                recipe.imageUrl,
+              child: CachedNetworkImage(
+                imageUrl: recipe.imageUrl.getCorsProxyUrl(),
                 height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
+                errorWidget: (context, error, stackTrace) {
                   return Container(
                     height: 200,
                     color: Colors.grey[300],

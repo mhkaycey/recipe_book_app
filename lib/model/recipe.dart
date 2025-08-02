@@ -10,7 +10,7 @@ class Recipe {
   final int cookTimeMinutes;
   final int prepTimeMinutes;
   final int servings;
-  final String difficulty; // 'easy', 'medium', 'hard'
+  final String difficulty;
   final List<Ingredient> ingredients;
   final List<String> instructions;
   final List<String> tags;
