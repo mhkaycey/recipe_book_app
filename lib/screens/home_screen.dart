@@ -54,6 +54,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(context),
@@ -76,38 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Drawer appDrawer(BuildContext context) {
-    return Drawer(
-      shape: ContinuousRectangleBorder(),
-
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-            child: Text(
-              'Recipe Book',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          ListTile(
-            leading: Icon(Icons.home),
-            title: Text('Home'),
-            onTap: () => Navigator.pushReplacementNamed(context, '/'),
-          ),
-          ListTile(
-            leading: Icon(Icons.shopping_cart_outlined),
-            title: Text('Shopping List'),
-            onTap: () => _navigateToShoppingList(context),
-          ),
-        ],
-      ),
-    );
-  }
-
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       title:
@@ -125,7 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderSide: BorderSide.none,
                     ),
                     filled: true,
-                    fillColor: Colors.grey[200],
                   ),
 
                   onSubmitted: (value) {
@@ -361,11 +334,5 @@ class _HomeScreenState extends State<HomeScreen> {
   void _viewAllRecipes(BuildContext context) {
     // Navigate to all recipes
     Navigator.pushNamed(context, '/recipes');
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 }
